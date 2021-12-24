@@ -11,13 +11,14 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: checkout code
         uses: actions/checkout@v2
+
+      - name: Perform Scan
+        uses: ShiftLeftSecurity/scan-action@master
 
       - name: Docker meta
         id: meta
