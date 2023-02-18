@@ -2,15 +2,13 @@ class QueueManager
   def initialize(mpd_conn, tag_mgr)
     puts "[!!!] building QueueManager"
 
+    # set instance variables
     @mpd = mpd_conn
     @tags  = tag_mgr
-    @songs = new_song_list
 
+    # create a new song list and shuffle it
+    @queue = new_song_list
     shuffle!
-  end
-
-  def queue
-    @songs
   end
 
   def new_song_list
@@ -34,66 +32,37 @@ class QueueManager
     @mpd.get_conn.queue[0, 2]
   end
 
-  # TODO: smaller method
   def shuffle!
     tags = @tags.tags
 
     # grab our jukebox songs
-    songs_any = []
-    tags['any'].each do |tag|
-      songs_any << songs_by_tag(tag)
-    end
+    songs_any = get_songs_by_tags(tags['any'])
+    songs_any -= get_songs_by_tags(tags['not']) if tags['not'].present?
 
-    songs_any.flatten!
-    to_loglines(songs_any)
-
-    # remove excluded tags
-    # TODO: I hate this implementation.
-    unless tags['not'].nil?
-      tags['not'].each do |tag|
-        playlist = @mpd.get_conn.playlists.find {|s| s.name == tag}
-
-        unless playlist.nil?
-          playlist.songs.each do |s|
-            puts "[+] removing #{s.file}"
-            songs_any.delete s
-          end
-        end
-      end
-    end
-
-    # this made more sense as a Set operation, but it's
-    # a useful identifier for following code flow.
     final_songs = songs_any
 
-    # TODO: we currently because this is broken
-    # no tags? return 100 songs.
-    if final_songs.length < 1
+    if final_songs.empty?
       fail RuntimeError, "[!!!] no valid songs to play. bad human! no cookie!"
     end
 
-    # DEBUG: print final set
-    # this will probably explode on all songs :P
     to_loglines(final_songs)
 
     # finalize the data for usage
-    @songs = final_songs.to_a
+    @songs = final_songs
     @songs.shuffle!
   end
 
   private
 
-  def songs_by_tag(tag)
-    songs = []
-    playlist = @mpd.get_conn.playlists.find {|s| s.name == tag}
+  def get_songs_by_tags(tags)
+    return [] if tags.nil?
 
-    unless playlist.nil?
-      playlist.songs.each do |s|
-        songs << s
-      end
+    tags.each_with_object([]) do |tag, songs|
+      playlist = @mpd.get_conn.playlists.find { |s| s.name == tag }
+      next if playlist.nil?
+
+      songs.concat(playlist.songs)
     end
-
-    songs
   end
 
   def to_loglines(queue)
