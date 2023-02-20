@@ -37,7 +37,8 @@ class QueueManager
 
     # grab our jukebox songs
     songs_any = get_songs_by_tags(tags['any'])
-    songs_any -= get_songs_by_tags(tags['not']) if tags['not'].present?
+    songs_any -= get_songs_by_tags(tags['not']) unless tags['not'].nil? || tags['not'].empty?
+
 
     final_songs = songs_any
 
