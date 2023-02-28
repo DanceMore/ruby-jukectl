@@ -46,10 +46,14 @@ class SongManager
 
   def walk_playlist(tag, path)
     playlist = @mpd.get_conn.playlists.find {|s| s.name == tag}
-    return nil if playlist.nil?
 
-    playlist.songs.each_with_index do |s, i|
-      return i if s.file == path
+    i = 0
+    playlist.songs.each do |s|
+      if s.file == path
+        return i
+      else
+        i = i + 1
+      end
     end
 
     nil

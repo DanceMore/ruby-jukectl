@@ -15,20 +15,21 @@ class WebApp < Sinatra::Base
   set :sessions, false
   enable :logging
 
-  configure do
+  def initialize(*args)
+    #we want to still *be* a Sinatra::Base
+    super
+
     @mpd_conn  = MpdConn.new
     @tag_mgr   = PlaylistTags.new
     @queue_mgr = QueueManager.new(@mpd_conn, @tag_mgr)
 
-    setup_scheduler unless defined?(Rake) || defined?(IRB) || ENV['DRYRUN']
-  end
-
-  def setup_scheduler
-    # scheduler
-    scheduler = Rufus::Scheduler.new
-    scheduler.every("3s") do
-      print "."
-      @queue_mgr.add_song!
+    unless defined?(Rake) || defined?(IRB) || ENV['DRYRUN']
+      # scheduler
+      scheduler = Rufus::Scheduler.new
+      scheduler.every("3s") do
+        print "."
+        @queue_mgr.add_song!
+      end
     end
   end
 
@@ -87,40 +88,58 @@ class WebApp < Sinatra::Base
 
   post '/reload' do
     # sample the head of the queue...
-    old_pls = @queue_mgr.queue.last(4).reverse
+    arr = @queue_mgr.queue
+    arr = arr.reverse
+    old_pls = arr[0..3]
 
     # DESTROY THE QUEUE AND RESHUFFLE WITH NEW TAGS
     @queue_mgr.shuffle!
 
     # sample again...
-    new_pls = @queue_mgr.queue.last(4).reverse
+    arr = @queue_mgr.queue
+    arr = arr.reverse
+    new_pls = arr[0..3]
 
     # format it ;)
     res_old = queue_to_filenames(old_pls)
     res_new = queue_to_filenames(new_pls)
 
-    json({old: res_old, new: res_new})
+    json({:old => res_old, :new => res_new})
   end
 
+  # I think this all sucks but whatever,
+  # it probably worked in the past, maybe it's still good...
   post '/tags' do
-    content_type :json
-
+    # make sure we have a Request Body
     begin
-      request_body = JSON.parse(request.body.read)
-      tags_any = request_body['any'] || []
-      tags_not = request_body['not'] || []
-    rescue JSON::ParserError => e
-      error_msg = "Error occurred while parsing the request body: #{e}"
-      halt 400, { error: error_msg }.to_json
+      @body = request.body.read
+      data = JSON.parse(@body)
+      puts "[!] PARSED DATA => #{data['any']}"
+      puts "[!] PARSED DATA => #{data['not']}"
+    rescue Exception => e
+      @runtime.error(e)
+      @msg = "Error occured reading POST body."
+      halt 500, json({:error => @msg})
     end
 
-    @tag_mgr.any_tags!(tags_any)
-    @tag_mgr.not_tags!(tags_not)
+    tags_any = data['any']
+    tags_not = data['not']
 
-    # Shuffle the queue with new tags
+    if tags_not.nil?
+      tags_not = []
+    end
+
+    # TODO: ensure the data doesn't suck when it gets here
+    @tag_mgr.any_tags! tags_any
+    @tag_mgr.not_tags! tags_not
+
+    # DESTROY THE QUEUE AND RESHUFFLE WITH NEW TAGS
     @queue_mgr.shuffle!
 
-    { tags: @tag_mgr.tags }.to_json
+    # return the new tag list
+    res = @tag_mgr.tags
+
+    json res
   end
 
   post '/song/tags' do
