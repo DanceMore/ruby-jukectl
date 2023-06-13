@@ -23,6 +23,12 @@ since the switch over to Sinatra+JSON+mpd-as-database, `jukectl` has served me d
 ```
 TODO
 
+clean up code; document
+
+document API
+
+document how to fire the containerized ncurses CLI (which I haven't finished installing / wrapping up)
+
 add environment var for default json tags
   maybe encode in base64 lololol
 ```
