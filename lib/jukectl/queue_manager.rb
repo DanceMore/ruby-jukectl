@@ -11,6 +11,11 @@ class QueueManager
     shuffle!
   end
 
+  # I thought the @ accessor did this ..?
+  def queue
+    @queue
+  end
+
   def new_song_list
     shuffle!
   end
