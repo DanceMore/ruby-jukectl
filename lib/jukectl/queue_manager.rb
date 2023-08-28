@@ -51,8 +51,6 @@ class QueueManager
       fail RuntimeError, "[!!!] no valid songs to play. bad human! no cookie!"
     end
 
-    to_loglines(final_songs)
-
     # finalize the data for usage
     @songs = final_songs
     @songs.shuffle!
@@ -69,12 +67,6 @@ class QueueManager
 
       songs.concat(playlist.songs)
     end
-  end
-
-  def to_loglines(queue)
-    #queue.each do |song|
-    #  logger.debug "[-] #{song} => #{song.file}"
-    #end
   end
 
   def add_random_song
