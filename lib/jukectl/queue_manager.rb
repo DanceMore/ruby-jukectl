@@ -8,12 +8,7 @@ class QueueManager
     @tags  = tag_mgr
 
     # create a new song list and shuffle it
-    @queue = new_song_list
-    shuffle!
-  end
-
-  def new_song_list
-    shuffle!
+    @queue = shuffle!
   end
 
   def add_song!
