@@ -1,6 +1,6 @@
 class MpdConn
   def initialize
-    puts "[!!!] connecting to mpd..."
+    puts "[!] connecting to mpd..."
 
     @mpd = MPD.new ENV['MPD_HOST'], ENV['MPD_PORT']
     unless ENV['MPD_PASS'].nil?
