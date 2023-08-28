@@ -1,9 +1,10 @@
 class QueueManager
   def initialize(mpd_conn, tag_mgr)
-    puts "[!!!] building QueueManager"
+    puts "[!] building QueueManager"
 
     # set instance variables
-    @mpd = mpd_conn
+    attr_accessor :queue
+    @mpd   = mpd_conn
     @tags  = tag_mgr
 
     # create a new song list and shuffle it
