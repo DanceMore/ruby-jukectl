@@ -11,6 +11,15 @@ class QueueManager
     @queue = shuffle!
   end
 
+  # print the head of the queue
+  def now_playing
+    @mpd.get_conn.queue[0, 2]
+  end
+
+  def skip!
+    @mpd.get_conn.next
+  end
+
   def add_song!
     if @mpd.get_conn.queue.length < 2
       add_random_song
@@ -20,21 +29,12 @@ class QueueManager
     end
   end
 
-  def skip!
-    @mpd.get_conn.next
-  end
-
-  def now_playing
-    @mpd.get_conn.queue[0, 2]
-  end
-
   def shuffle!
     tags = @tags.tags
 
     # grab our jukebox songs
     songs_any = get_songs_by_tags(tags['any'])
     songs_any -= get_songs_by_tags(tags['not']) unless tags['not'].nil? || tags['not'].empty?
-
 
     final_songs = songs_any
 
