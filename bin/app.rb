@@ -51,7 +51,6 @@ class WebApp < Sinatra::Base
   get '/' do
     arr = @queue_mgr.now_playing
 
-    # format it ;)
     res = queue_to_filenames(arr)
     json res
   end
@@ -63,10 +62,9 @@ class WebApp < Sinatra::Base
     # songs are added via Array.pop which
     # returns the last element of the array.
     #
-    # we want to display it in playback order :)
+    # we want the API to display it in playback order :)
     arr = arr.reverse
 
-    # format output
     res = queue_to_filenames(arr)
     json res
   end
