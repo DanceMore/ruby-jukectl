@@ -2,6 +2,8 @@
 
 a little doo-dad that uses `mpd` as the Database and Player to be your own private jukebox... thingie.
 
+![jukectl-arch-diagram](https://github.com/DanceMore/jukectl/assets/79212033/23d3e014-aadd-4268-9ab4-a60f2135f3c8)
+
 ## history
 
 what you are seeing here is actually the 3rd or 4th iteration of an idea, where each copy became progressively simpler and simpler.
