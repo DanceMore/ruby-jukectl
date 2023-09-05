@@ -1,9 +1,10 @@
 class QueueManager
+  attr_accessor :queue
+
   def initialize(mpd_conn, tag_mgr)
     puts "[!] building QueueManager"
 
     # set instance variables
-    attr_accessor :queue
     @mpd   = mpd_conn
     @tags  = tag_mgr
 
