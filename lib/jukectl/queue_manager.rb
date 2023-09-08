@@ -1,6 +1,4 @@
 class QueueManager
-  attr_accessor :queue
-
   def initialize(mpd_conn, tag_mgr)
     puts "[!] building QueueManager"
 
@@ -10,6 +8,11 @@ class QueueManager
 
     # create a new song list and shuffle it
     @queue = shuffle!
+  end
+
+  # I thought the @ accessor did this ..?
+  def queue
+    @queue
   end
 
   # print the head of the queue
